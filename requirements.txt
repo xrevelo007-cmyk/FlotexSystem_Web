@@ -1,1 +1,4 @@
-flasknlibsql-experimentalngunicornnpython-dotenv
+flask
+libsql-experimental
+gunicorn
+python-dotenv
