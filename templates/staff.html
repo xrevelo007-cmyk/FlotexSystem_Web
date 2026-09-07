@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="w-full max-w-6xl bg-[#121214] border border-[#2C2C2E] rounded-[32px] p-6 md:p-8 shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+    
+    <!-- Encabezado con efecto Glow -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#2C2C2E]/80 pb-6 mb-8 gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-[#8E8E93] mb-1 tracking-wider uppercase font-semibold">
+                <a href="/dashboard" class="hover:text-[#0A84FF] transition">Dashboard</a>
+                <span>/</span>
+                <span class="text-white">Personal</span>
+            </div>
+            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-[#E5E5EA] to-[#8E8E93] flex items-center gap-3">
+                <span class="p-2 rounded-2xl bg-[#0A84FF]/10 text-[#0A84FF] border border-[#0A84FF]/20 text-xl shadow-[0_0_15px_rgba(10,132,255,0.3)]">🛡️</span> 
+                Gestión de Staff
+            </h1>
+        </div>
+        <a href="/dashboard" class="bg-[#2C2C2E] hover:bg-[#3A3A3C] text-white border border-[#3A3A3C] px-5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-2 shadow-lg hover:shadow-cyan-500/10">
+            <span>←</span> Volver al Dashboard
+        </a>
+    </div>
+
+    <!-- Alertas Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-6 p-4 rounded-2xl text-xs font-semibold border backdrop-blur-md shadow-lg {% if category == 'error' %}bg-[#FF453A]/10 text-[#FF453A] border-[#FF453A]/30{% else %}bg-[#30D158]/10 text-[#30D158] border-[#30D158]/30{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Formulario (4 Columnas) -->
+        <div class="lg:col-span-5 bg-gradient-to-b from-[#1C1C1E] to-[#161618] border border-[#2C2C2E] rounded-3xl p-6 shadow-xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-[#0A84FF]/5 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <h2 class="text-lg font-bold text-white mb-5 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#0A84FF] shadow-[0_0_8px_#0A84FF]"></span>
+                Registrar Usuario
+            </h2>
+
+            <form action="/staff" method="POST" class="space-y-4">
+                <div>
+                    <label class="text-[11px] font-medium text-[#8E8E93] block mb-1.5 uppercase tracking-wider">Cédula (10 dígitos)</label>
+                    <input type="text" name="cedula" required maxlength="10" minlength="10" pattern="[0-9]{10}"
+                        placeholder="Ej: 1722207287"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                        class="w-full h-11 px-4 rounded-2xl bg-[#2C2C2E]/60 border border-[#3A3A3C] text-white placeholder-[#636366] focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF] text-xs transition duration-200">
+                </div>
+                <div>
+                    <label class="text-[11px] font-medium text-[#8E8E93] block mb-1.5 uppercase tracking-wider">Nombre Completo</label>
+                    <input type="text" name="nombre" required
+                        placeholder="Nombre y Apellido"
+                        class="w-full h-11 px-4 rounded-2xl bg-[#2C2C2E]/60 border border-[#3A3A3C] text-white placeholder-[#636366] focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF] text-xs transition duration-200">
+                </div>
+                <div>
+                    <label class="text-[11px] font-medium text-[#8E8E93] block mb-1.5 uppercase tracking-wider">Cargo / Rol</label>
+                    <select name="cargo" required
+                        class="w-full h-11 px-4 rounded-2xl bg-[#2C2C2E]/60 border border-[#3A3A3C] text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF] text-xs transition duration-200">
+                        <option value="Administrador">Administrador</option>
+                        <option value="Entrenador">Entrenador</option>
+                        <option value="Recepcionista">Recepcionista</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[11px] font-medium text-[#8E8E93] block mb-1.5 uppercase tracking-wider">Teléfono (10 dígitos)</label>
+                    <input type="text" name="telefono" maxlength="10" pattern="[0-9]{10}"
+                        placeholder="Ej: 0991234567"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                        class="w-full h-11 px-4 rounded-2xl bg-[#2C2C2E]/60 border border-[#3A3A3C] text-white placeholder-[#636366] focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF] text-xs transition duration-200">
+                </div>
+                <div>
+                    <label class="text-[11px] font-medium text-[#8E8E93] block mb-1.5 uppercase tracking-wider">Usuario de Acceso</label>
+                    <input type="text" name="usuario" required
+                        placeholder="Usuario"
+                        class="w-full h-11 px-4 rounded-2xl bg-[#2C2C2E]/60 border border-[#3A3A3C] text-white placeholder-[#636366] focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF] text-xs transition duration-200">
+                </div>
+                <div>
+                    <label class="text-[11px] font-medium text-[#8E8E93] block mb-1.5 uppercase tracking-wider">Contraseña</label>
+                    <input type="password" name="password" required
+                        placeholder="••••••••"
+                        class="w-full h-11 px-4 rounded-2xl bg-[#2C2C2E]/60 border border-[#3A3A3C] text-white placeholder-[#636366] focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF] text-xs transition duration-200">
+                </div>
+                
+                <button type="submit" 
+                    class="w-full h-12 bg-gradient-to-r from-[#0A84FF] to-[#0066CC] hover:from-[#0066CC] hover:to-[#0A84FF] text-white font-bold rounded-2xl transition duration-300 text-xs mt-3 shadow-[0_4px_20px_rgba(10,132,255,0.4)] hover:shadow-[0_4px_25px_rgba(10,132,255,0.6)] flex items-center justify-center gap-2">
+                    <span>Guardar Usuario</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Tabla (7 Columnas) -->
+        <div class="lg:col-span-7 overflow-x-auto">
+            <h2 class="text-lg font-bold text-white mb-5 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#30D158] shadow-[0_0_8px_#30D158]"></span>
+                Personal Registrado
+            </h2>
+            <div class="border border-[#2C2C2E] rounded-3xl overflow-hidden bg-[#1C1C1E]/80 backdrop-blur-md shadow-2xl">
+                <table class="w-full text-left text-xs text-white">
+                    <thead class="bg-[#2C2C2E]/80 text-[#8E8E93] uppercase text-[10px] tracking-widest border-b border-[#3A3A3C]/60">
+                        <tr>
+                            <th class="p-4">Usuario</th>
+                            <th class="p-4">Cargo</th>
+                            <th class="p-4">Acceso</th>
+                            <th class="p-4 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#2C2C2E]/80">
+                        {% for member in staff_members %}
+                        <tr class="hover:bg-[#2C2C2E]/40 transition duration-150">
+                            <td class="p-4">
+                                <div class="font-bold text-white text-sm">{{ member[2] }}</div>
+                                <div class="text-[11px] text-[#8E8E93] font-mono mt-0.5">C.I: {{ member[1] }}</div>
+                            </td>
+                            <td class="p-4">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border shadow-sm
+                                    {% if member[3] == 'Administrador' %}bg-[#0A84FF]/15 text-[#64D2FF] border-[#0A84FF]/40 shadow-[0_0_10px_rgba(10,132,255,0.2)]
+                                    {% elif member[3] == 'Entrenador' %}bg-[#BF5AF2]/15 text-[#E58FFF] border-[#BF5AF2]/40 shadow-[0_0_10px_rgba(191,90,242,0.2)]
+                                    {% else %}bg-[#30D158]/15 text-[#66D981] border-[#30D158]/40 shadow-[0_0_10px_rgba(48,209,88,0.2)]{% endif %}">
+                                    {{ member[3] }}
+                                </span>
+                            </td>
+                            <td class="p-4 text-[#8E8E93] font-mono text-xs">{{ member[5] }}</td>
+                            <td class="p-4 text-right">
+                                {% if member[1] != '1722207287' %}
+                                <a href="/staff/eliminar/{{ member[0] }}" 
+                                   onclick="return confirm('¿Seguro que deseas eliminar este usuario?');"
+                                   class="text-[#FF453A] hover:bg-[#FF453A]/20 border border-[#FF453A]/40 px-3 py-1.5 rounded-xl transition duration-150 font-semibold text-[11px] shadow-sm">
+                                    Eliminar
+                                </a>
+                                {% else %}
+                                <span class="text-[10px] text-[#0A84FF] font-bold uppercase tracking-wider bg-[#0A84FF]/10 px-2.5 py-1 rounded-full border border-[#0A84FF]/30">Creador</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
