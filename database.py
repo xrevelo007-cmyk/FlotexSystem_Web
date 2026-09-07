@@ -1,16 +1,12 @@
 import sqlite3
 
-# Ruta segura para base de datos
-DB_NAME = 'gym_sistema.db'
-
-def conectar_db():
-    return sqlite3.connect(DB_NAME)
+DB_NAME = "gym_sistema.db"
 
 def inicializar_base_datos():
-    conexion = conectar_db()
-    cursor = conexion.cursor()
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
     
-    # 1. Tabla de Usuarios / Staff
+    # 1. Tabla Staff
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS staff (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,68 +16,54 @@ def inicializar_base_datos():
             telefono TEXT,
             usuario TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            primer_ingreso INTEGER DEFAULT 1,
-            estado TEXT DEFAULT 'Activo'
+            estado TEXT DEFAULT 'Activo',
+            primer_ingreso INTEGER DEFAULT 1
         )
     """)
     
-    # Insertar administrador por defecto si no existe
-    cursor.execute("SELECT COUNT(*) FROM staff")
-    if cursor.fetchone()[0] == 0:
-        cursor.execute("""
-            INSERT INTO staff (cedula, nombre, cargo, telefono, usuario, password, primer_ingreso)
-            VALUES ('1722207287', 'Xavier Revelo', 'Administrador', '0000000000', '1722207287', 'Ligacampeon24', 1)
-        """)
-        conexion.commit()
+    # Usuario Creador por defecto (Xavier Revelo)
+    cursor.execute("""
+        INSERT OR IGNORE INTO staff (cedula, nombre, cargo, telefono, usuario, password, primer_ingreso)
+        VALUES ('1722207287', 'Xavier Revelo', 'Administrador', '0990000000', '1722207287', '1722207287', 1)
+    """)
 
-    # 2. Tabla de Clientes
+    # 2. Tabla Clientes (Estructura base para el siguiente módulo)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS clientes (
-            cedula TEXT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cedula TEXT UNIQUE NOT NULL,
             nombre TEXT NOT NULL,
-            edad INTEGER,
-            direccion TEXT,
             telefono TEXT,
-            emergencia TEXT,
-            medico TEXT,
-            ruta_foto TEXT,
             plan TEXT,
-            precio_plan REAL,
-            fecha_inicio TEXT,
             fecha_vencimiento TEXT,
-            grupo_id TEXT DEFAULT ''
+            estado TEXT DEFAULT 'Activo'
         )
     """)
 
-    # 3. Tabla de Inventario
+    # 3. Tabla Inventario
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS inventario (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            codigo TEXT UNIQUE NOT NULL,
-            nombre TEXT NOT NULL,
-            categoria TEXT NOT NULL,
+            producto TEXT NOT NULL,
             precio REAL NOT NULL,
             stock INTEGER NOT NULL
         )
     """)
 
-    # 4. Tabla de Ventas
+    # 4. Tabla Ventas / Caja
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS ventas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            producto_id INTEGER,
-            nombre_producto TEXT,
-            cantidad INTEGER,
-            total REAL,
-            efectivo REAL,
-            transferencia REAL,
-            usuario TEXT,
+            concepto TEXT NOT NULL,
+            monto REAL NOT NULL,
+            metodo_pago TEXT NOT NULL,
             fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    
+    conn.commit()
+    conn.close()
 
-    conexion.commit()
-    conexion.close()
-
-# Ejecutar inicialización al importar
-inicializar_base_datos()
+if __name__ == "__main__":
+    inicializar_base_datos()
+    print("Base de datos e infraestructura inicializadas correctamente.")
