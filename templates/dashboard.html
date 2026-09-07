@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="w-full max-w-4xl bg-iosCard border border-iosBorder rounded-[28px] p-8 shadow-2xl">
+    
+    <!-- Header del Dashboard -->
+    <div class="flex justify-between items-center border-b border-iosBorder pb-6 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-white">FlotexSystem Web</h1>
+            <p class="text-iosTextGray text-sm">Bienvenido, <span class="text-iosBlue font-semibold">{{ nombre }}</span> ({{ cargo }})</p>
+        </div>
+        <a href="/logout" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-4 py-2 rounded-xl text-sm transition">
+            Cerrar Sesión
+        </a>
+    </div>
+
+    <!-- Módulos Principales -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Módulo Clientes -->
+        <div class="bg-[#2C2C2E] p-5 rounded-2xl border border-[#3A3A3C] hover:border-iosBlue transition cursor-pointer">
+            <div class="text-3xl mb-2">👥</div>
+            <h3 class="font-bold text-lg mb-1">Clientes</h3>
+            <p class="text-xs text-iosTextGray">Gestión de miembros, fotos y membresías.</p>
+        </div>
+
+        <!-- Módulo Inventario -->
+        <div class="bg-[#2C2C2E] p-5 rounded-2xl border border-[#3A3A3C] hover:border-iosBlue transition cursor-pointer">
+            <div class="text-3xl mb-2">📦</div>
+            <h3 class="font-bold text-lg mb-1">Inventario</h3>
+            <p class="text-xs text-iosTextGray">Control de productos y existencias.</p>
+        </div>
+
+        <!-- Módulo Caja -->
+        <div class="bg-[#2C2C2E] p-5 rounded-2xl border border-[#3A3A3C] hover:border-iosBlue transition cursor-pointer">
+            <div class="text-3xl mb-2">💰</div>
+            <h3 class="font-bold text-lg mb-1">Caja</h3>
+            <p class="text-xs text-iosTextGray">Registro de ventas y cuadres diarios.</p>
+        </div>
+
+        <!-- Módulo Staff -->
+        <div class="bg-[#2C2C2E] p-5 rounded-2xl border border-[#3A3A3C] hover:border-iosBlue transition cursor-pointer">
+            <div class="text-3xl mb-2">🛡️</div>
+            <h3 class="font-bold text-lg mb-1">Staff</h3>
+            <p class="text-xs text-iosTextGray">Administración de usuarios y roles.</p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
