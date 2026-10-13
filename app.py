@@ -16,11 +16,14 @@ inicializar_base_datos()
 def actualizar_tablas_bd():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
+    
     columnas_cliente = [
         ("direccion", "TEXT"),
         ("contacto_emergencia", "TEXT"),
         ("parentesco_emergencia", "TEXT"),
-        ("foto", "TEXT")
+        ("foto", "TEXT"),
+        ("plan", "TEXT"),
+        ("fecha_vencimiento", "TEXT")
     ]
     for col, tipo in columnas_cliente:
         try:
@@ -52,7 +55,7 @@ def calcular_semaforo(fecha_venc_str):
     if not fecha_venc_str:
         return 'rojo', -999, 'Sin fecha'
     try:
-        fecha_venc = datetime.strptime(fecha_venc_str, '%Y-%m-%d').date()
+        fecha_venc = datetime.strptime(str(fecha_venc_str), '%Y-%m-%d').date()
         hoy = datetime.now().date()
         dias_restantes = (fecha_venc - hoy).days
         
@@ -150,7 +153,8 @@ def clientes():
         parentesco_emergencia = request.form.get("parentesco_emergencia", "").strip()
         
         plan = request.form.get("plan", "Mensual").strip()
-        valor = float(request.form.get("valor", 30.0))
+        valor_raw = request.form.get("valor", "30.00")
+        valor = float(valor_raw) if valor_raw else 30.0
         numero_recibo = request.form.get("numero_recibo", "1001").strip()
         mes_trabajo = request.form.get("mes_trabajo", "").strip()
         fecha_pago = request.form.get("fecha_pago", "").strip()
@@ -187,18 +191,36 @@ def clientes():
             except Exception as e:
                 flash(f"Error al registrar: {e}", "error")
 
-    cursor.execute("SELECT id, cedula, nombre, telefono, direccion, contacto_emergencia, parentesco_emergencia, plan, fecha_vencimiento, estado, foto FROM clientes")
-    raw_clientes = cursor.fetchall()
+    try:
+        cursor.execute("SELECT id, cedula, nombre, telefono, direccion, contacto_emergencia, parentesco_emergencia, plan, fecha_vencimiento, estado, foto FROM clientes")
+        raw_clientes = cursor.fetchall()
+    except Exception:
+        raw_clientes = []
     
-    cursor.execute("SELECT MAX(CAST(numero_recibo AS INTEGER)) FROM pagos")
-    ultimo_recibo = cursor.fetchone()[0]
-    siguiente_recibo = str(int(ultimo_recibo) + 1) if ultimo_recibo else "1001"
+    try:
+        cursor.execute("SELECT MAX(CAST(numero_recibo AS INTEGER)) FROM pagos")
+        res_recibo = cursor.fetchone()
+        ultimo_recibo = res_recibo[0] if res_recibo else None
+        siguiente_recibo = str(int(ultimo_recibo) + 1) if ultimo_recibo else "1001"
+    except Exception:
+        siguiente_recibo = "1001"
 
     conn.close()
 
     clientes_procesados = []
     for c in raw_clientes:
-        c_id, cedula, nombre, telefono, direccion, contacto_emergencia, parentesco_emergencia, plan, fecha_venc, estado, foto = c
+        c_id = c[0]
+        cedula = c[1]
+        nombre = c[2]
+        telefono = c[3]
+        direccion = c[4] if len(c) > 4 else ""
+        contacto_emergencia = c[5] if len(c) > 5 else ""
+        parentesco_emergencia = c[6] if len(c) > 6 else ""
+        plan = c[7] if len(c) > 7 else "Mensual"
+        fecha_venc = c[8] if len(c) > 8 else ""
+        estado = c[9] if len(c) > 9 else "Activo"
+        foto = c[10] if len(c) > 10 and c[10] else "default.png"
+
         color, dias, texto_estado = calcular_semaforo(fecha_venc)
         foto_url = url_for('static', filename=f'uploads/{foto}') if foto and foto != "default.png" else 'https://cdn-icons-png.flaticon.com/512/847/847969.png'
         
@@ -231,7 +253,8 @@ def renovar_cliente(cliente_id):
     fecha_pago = request.form.get("fecha_pago", "").strip()
     fecha_inicio = request.form.get("fecha_inicio", "").strip()
     plan = request.form.get("nuevo_plan", "").strip()
-    valor = float(request.form.get("valor", 30.0))
+    valor_raw = request.form.get("valor", "30.00")
+    valor = float(valor_raw) if valor_raw else 30.0
     fecha_vencimiento = request.form.get("fecha_vencimiento", "").strip()
 
     conn = sqlite3.connect(DB_NAME)
