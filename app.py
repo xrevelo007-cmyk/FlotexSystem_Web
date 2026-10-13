@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
+from datetime import datetime
 from database import DB_NAME, inicializar_base_datos
 
 app = Flask(__name__)
@@ -7,6 +8,36 @@ app.secret_key = "flotex_system_secret_key_secure"
 
 # Inicializar Base de Datos
 inicializar_base_datos()
+
+# Asegurar columna 'foto' en la tabla clientes
+def actualizar_tabla_clientes():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("ALTER TABLE clientes ADD COLUMN foto TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass # La columna ya existe
+    conn.close()
+
+actualizar_tabla_clientes()
+
+def calcular_semaforo(fecha_venc_str):
+    if not fecha_venc_str:
+        return 'rojo', -999, 'Sin fecha'
+    try:
+        fecha_venc = datetime.strptime(fecha_venc_str, '%Y-%m-%d').date()
+        hoy = datetime.now().date()
+        dias_restantes = (fecha_venc - hoy).days
+        
+        if dias_restantes > 3:
+            return 'verde', dias_restantes, 'AL DÍA'
+        elif 0 <= dias_restantes <= 3:
+            return 'amarillo', dias_restantes, 'POR VENCER'
+        else:
+            return 'rojo', dias_restantes, 'VENCIDO / MOROSO'
+    except Exception:
+        return 'rojo', 0, 'ERROR FECHA'
 
 # --- RUTA LOGIN ---
 @app.route("/", methods=["GET", "POST"])
@@ -74,8 +105,8 @@ def clientes():
         telefono = request.form.get("telefono", "").strip()
         plan = request.form.get("plan", "").strip()
         fecha_vencimiento = request.form.get("fecha_vencimiento", "").strip()
+        foto = request.form.get("foto", "").strip()
 
-        # Validación estricta de 10 dígitos numéricos
         if not cedula.isdigit() or len(cedula) != 10:
             flash("La cédula del cliente debe contener exactamente 10 dígitos numéricos.", "error")
         elif telefono and (not telefono.isdigit() or len(telefono) != 10):
@@ -83,9 +114,9 @@ def clientes():
         else:
             try:
                 cursor.execute("""
-                    INSERT INTO clientes (cedula, nombre, telefono, plan, fecha_vencimiento, estado)
-                    VALUES (?, ?, ?, ?, ?, 'Activo')
-                """, (cedula, nombre, telefono, plan, fecha_vencimiento))
+                    INSERT INTO clientes (cedula, nombre, telefono, plan, fecha_vencimiento, estado, foto)
+                    VALUES (?, ?, ?, ?, ?, 'Activo', ?)
+                """, (cedula, nombre, telefono, plan, fecha_vencimiento, foto))
                 conn.commit()
                 flash("Cliente registrado exitosamente.", "success")
             except sqlite3.IntegrityError:
@@ -93,11 +124,28 @@ def clientes():
             except Exception as e:
                 flash(f"Error al guardar cliente: {e}", "error")
 
-    cursor.execute("SELECT id, cedula, nombre, telefono, plan, fecha_vencimiento, estado FROM clientes")
-    lista_clientes = cursor.fetchall()
+    cursor.execute("SELECT id, cedula, nombre, telefono, plan, fecha_vencimiento, estado, foto FROM clientes")
+    raw_clientes = cursor.fetchall()
     conn.close()
 
-    return render_template("clientes.html", clientes_list=lista_clientes, nombre=session.get("nombre"))
+    clientes_procesados = []
+    for c in raw_clientes:
+        c_id, cedula, nombre, telefono, plan, fecha_venc, estado, foto = c
+        color, dias, texto_estado = calcular_semaforo(fecha_venc)
+        clientes_procesados.append({
+            'id': c_id,
+            'cedula': cedula,
+            'nombre': nombre,
+            'telefono': telefono,
+            'plan': plan,
+            'fecha_vencimiento': fecha_venc,
+            'foto': foto if foto else 'https://cdn-icons-png.flaticon.com/512/847/847969.png',
+            'color': color,
+            'dias_restantes': dias,
+            'texto_estado': texto_estado
+        })
+
+    return render_template("clientes.html", clientes_list=clientes_procesados, nombre=session.get("nombre"))
 
 # --- ELIMINAR CLIENTE ---
 @app.route("/clientes/eliminar/<int:cliente_id>")

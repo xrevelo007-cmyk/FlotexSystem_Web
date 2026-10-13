@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="w-full max-w-6xl bg-[#121214] border border-[#2C2C2E] rounded-[32px] p-6 md:p-8 shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+<div class="w-full max-w-7xl bg-[#121214] border border-[#2C2C2E] rounded-[32px] p-6 md:p-8 shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-xl">
     
     <!-- Encabezado -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#2C2C2E]/80 pb-6 mb-8 gap-4">
@@ -12,7 +12,7 @@
             </div>
             <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-[#E5E5EA] to-[#8E8E93] flex items-center gap-3">
                 <span class="p-2 rounded-2xl bg-[#30D158]/10 text-[#30D158] border border-[#30D158]/20 text-xl shadow-[0_0_15px_rgba(48,209,88,0.3)]">👥</span> 
-                Gestión de Clientes
+                Gestión y Control de Membresías
             </h1>
         </div>
         <a href="/dashboard" class="bg-[#2C2C2E] hover:bg-[#3A3A3C] text-white border border-[#3A3A3C] px-5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-2 shadow-lg">
@@ -39,7 +39,7 @@
             
             <h2 class="text-lg font-bold text-white mb-5 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-[#30D158] shadow-[0_0_8px_#30D158]"></span>
-                Nuevo Cliente
+                Nuevo Cliente (Desde Forms o Manual)
             </h2>
 
             <form action="/clientes" method="POST" class="space-y-4">
@@ -64,6 +64,12 @@
                         class="w-full h-11 px-4 rounded-2xl bg-[#2C2C2E]/60 border border-[#3A3A3C] text-white placeholder-[#636366] focus:outline-none focus:border-[#30D158] focus:ring-1 focus:ring-[#30D158] text-xs transition duration-200">
                 </div>
                 <div>
+                    <label class="text-[11px] font-medium text-[#8E8E93] block mb-1.5 uppercase tracking-wider">URL de Foto (Google Drive/Forms)</label>
+                    <input type="url" name="foto"
+                        placeholder="https://drive.google.com/... o enlace de imagen"
+                        class="w-full h-11 px-4 rounded-2xl bg-[#2C2C2E]/60 border border-[#3A3A3C] text-white placeholder-[#636366] focus:outline-none focus:border-[#30D158] focus:ring-1 focus:ring-[#30D158] text-xs transition duration-200">
+                </div>
+                <div>
                     <label class="text-[11px] font-medium text-[#8E8E93] block mb-1.5 uppercase tracking-wider">Plan / Membresía</label>
                     <select name="plan" required
                         class="w-full h-11 px-4 rounded-2xl bg-[#2C2C2E]/60 border border-[#3A3A3C] text-white focus:outline-none focus:border-[#30D158] focus:ring-1 focus:ring-[#30D158] text-xs transition duration-200">
@@ -81,23 +87,23 @@
                 
                 <button type="submit" 
                     class="w-full h-12 bg-gradient-to-r from-[#30D158] to-[#248A3D] hover:from-[#248A3D] hover:to-[#30D158] text-white font-bold rounded-2xl transition duration-300 text-xs mt-3 shadow-[0_4px_20px_rgba(48,209,88,0.4)] flex items-center justify-center gap-2">
-                    <span>Registrar Cliente</span>
+                    <span>Registrar / Activar Cliente</span>
                 </button>
             </form>
         </div>
 
-        <!-- Tabla Clientes -->
+        <!-- Tabla Clientes con Semáforo -->
         <div class="lg:col-span-7 overflow-x-auto">
             <h2 class="text-lg font-bold text-white mb-5 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-[#0A84FF] shadow-[0_0_8px_#0A84FF]"></span>
-                Base de Clientes
+                Control de Ingresos y Semáforo de Pagos
             </h2>
             <div class="border border-[#2C2C2E] rounded-3xl overflow-hidden bg-[#1C1C1E]/80 backdrop-blur-md shadow-2xl">
                 <table class="w-full text-left text-xs text-white">
                     <thead class="bg-[#2C2C2E]/80 text-[#8E8E93] uppercase text-[10px] tracking-widest border-b border-[#3A3A3C]/60">
                         <tr>
-                            <th class="p-4">Cliente</th>
-                            <th class="p-4">Plan</th>
+                            <th class="p-4">Foto / Cliente</th>
+                            <th class="p-4">Estado / Semáforo</th>
                             <th class="p-4">Vencimiento</th>
                             <th class="p-4 text-right">Acción</th>
                         </tr>
@@ -105,18 +111,37 @@
                     <tbody class="divide-y divide-[#2C2C2E]/80">
                         {% for cliente in clientes_list %}
                         <tr class="hover:bg-[#2C2C2E]/40 transition duration-150">
-                            <td class="p-4">
-                                <div class="font-bold text-white text-sm">{{ cliente[2] }}</div>
-                                <div class="text-[11px] text-[#8E8E93] font-mono mt-0.5">C.I: {{ cliente[1] }} | Tel: {{ cliente[3] }}</div>
+                            <td class="p-4 flex items-center gap-3">
+                                <img src="{{ cliente.foto }}" alt="Foto" class="w-10 h-10 rounded-full object-cover border border-[#3A3A3C] bg-[#2C2C2E]">
+                                <div>
+                                    <div class="font-bold text-white text-sm">{{ cliente.nombre }}</div>
+                                    <div class="text-[11px] text-[#8E8E93] font-mono">C.I: {{ cliente.cedula }} | Tel: {{ cliente.telefono }}</div>
+                                </div>
                             </td>
                             <td class="p-4">
-                                <span class="px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border bg-[#0A84FF]/15 text-[#64D2FF] border-[#0A84FF]/40 shadow-sm">
-                                    {{ cliente[4] }}
-                                </span>
+                                {% if cliente.color == 'verde' %}
+                                    <span class="px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wide uppercase border bg-[#30D158]/15 text-[#30D158] border-[#30D158]/40 shadow-[0_0_10px_rgba(48,209,88,0.2)] flex items-center gap-1.5 w-max">
+                                        <span class="w-2 h-2 rounded-full bg-[#30D158] animate-pulse"></span>
+                                        {{ cliente.texto_estado }} ({{ cliente.dias_restantes }}d)
+                                    </span>
+                                {% elif cliente.color == 'amarillo' %}
+                                    <span class="px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wide uppercase border bg-[#FFD60A]/15 text-[#FFD60A] border-[#FFD60A]/40 shadow-[0_0_10px_rgba(255,214,10,0.2)] flex items-center gap-1.5 w-max">
+                                        <span class="w-2 h-2 rounded-full bg-[#FFD60A] animate-pulse"></span>
+                                        {{ cliente.texto_estado }} ({{ cliente.dias_restantes }}d)
+                                    </span>
+                                {% else %}
+                                    <span class="px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wide uppercase border bg-[#FF453A]/20 text-[#FF453A] border-[#FF453A]/50 shadow-[0_0_15px_rgba(255,69,58,0.4)] flex items-center gap-1.5 w-max font-extrabold">
+                                        <span class="w-2 h-2 rounded-full bg-[#FF453A] animate-ping"></span>
+                                        {{ cliente.texto_estado }}
+                                    </span>
+                                {% endif %}
                             </td>
-                            <td class="p-4 text-[#E5E5EA] font-mono text-xs">{{ cliente[5] }}</td>
+                            <td class="p-4 text-[#E5E5EA] font-mono text-xs">
+                                <div>{{ cliente.fecha_vencimiento }}</div>
+                                <div class="text-[10px] text-[#8E8E93] uppercase">{{ cliente.plan }}</div>
+                            </td>
                             <td class="p-4 text-right">
-                                <a href="/clientes/eliminar/{{ cliente[0] }}" 
+                                <a href="/clientes/eliminar/{{ cliente.id }}" 
                                    onclick="return confirm('¿Seguro que deseas eliminar este cliente?');"
                                    class="text-[#FF453A] hover:bg-[#FF453A]/20 border border-[#FF453A]/40 px-3 py-1.5 rounded-xl transition duration-150 font-semibold text-[11px] shadow-sm">
                                     Eliminar
