@@ -148,11 +148,11 @@
             </form>
         </div>
 
-        <!-- Tabla Clientes con Buscador Instantáneo y Botón de WhatsApp -->
+        <!-- Tabla Clientes con Buscador Instantáneo y Foto Ampliable -->
         <div class="lg:col-span-7">
             <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-[#0A84FF] shadow-[0_0_8px_#0A84FF]"></span>
-                2. Base de Clientes (Clic en foto para pagar / Avisar WhatsApp)
+                2. Base de Clientes (Clic en foto para ampliar / Clic en nombre para pagar)
             </h2>
             
             <!-- Barra de Búsqueda de Clientes -->
@@ -175,17 +175,21 @@
                         {% for cliente in clientes_list %}
                         <tr class="hover:bg-[#2C2C2E]/40 transition">
                             <td class="p-4">
-                                <button type="button" onclick="abrirModalPago('{{ cliente.id }}', '{{ cliente.nombre }}')" class="flex items-center gap-3 text-left group focus:outline-none">
-                                    <img src="{{ cliente.foto }}" alt="Foto" class="w-11 h-11 rounded-full object-cover border border-[#3A3A3C] group-hover:border-[#30D158] transition shadow-md">
+                                <div class="flex items-center gap-3 text-left">
+                                    <!-- Foto Ampliable -->
+                                    <img src="{{ cliente.foto }}" alt="Foto" onclick="abrirModalFoto('{{ cliente.foto }}', '{{ cliente.nombre }}')" title="Ampliar foto"
+                                        class="w-12 h-12 rounded-full object-cover border-2 border-[#3A3A3C] hover:border-[#30D158] cursor-pointer transition transform hover:scale-110 shadow-md">
+                                    
                                     <div>
-                                        <div class="font-bold text-white text-sm group-hover:text-[#30D158] transition flex items-center gap-1.5">
+                                        <!-- Nombre con enlace para pagar -->
+                                        <button type="button" onclick="abrirModalPago('{{ cliente.id }}', '{{ cliente.nombre }}')" class="font-bold text-white text-sm hover:text-[#30D158] transition flex items-center gap-1.5 focus:outline-none text-left">
                                             {{ cliente.nombre }}
                                             <span class="text-[10px] bg-[#30D158]/20 text-[#30D158] px-1.5 py-0.5 rounded-md border border-[#30D158]/30">Pagar ⚡</span>
-                                        </div>
+                                        </button>
                                         <div class="text-[11px] text-[#8E8E93] font-mono">C.I: {{ cliente.cedula }} | Tel: {{ cliente.telefono }}</div>
                                         <div class="text-[10px] text-[#636366]">Emergencia: {{ cliente.contacto_emergencia or 'N/D' }} ({{ cliente.parentesco_emergencia or 'N/D' }})</div>
                                     </div>
-                                </button>
+                                </div>
                             </td>
                             <td class="p-4">
                                 {% if cliente.color == 'verde' %}
@@ -229,6 +233,19 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- Modal de Foto Ampliada (Lightbox) -->
+<div id="modal-foto" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4" onclick="cerrarModalFoto()">
+    <div class="bg-[#1C1C1E] border border-[#2C2C2E] rounded-[32px] p-6 w-full max-w-sm shadow-2xl relative text-center" onclick="event.stopPropagation()">
+        <h3 id="modal-foto-nombre" class="text-sm font-bold text-white mb-4 font-mono uppercase tracking-wider"></h3>
+        <div class="flex justify-center mb-6">
+            <img id="img-ampliada" src="" alt="Foto Ampliada" class="w-56 h-56 rounded-2xl object-cover border-2 border-[#30D158] shadow-[0_0_30px_rgba(48,209,88,0.3)]">
+        </div>
+        <button type="button" onclick="cerrarModalFoto()" class="w-full h-10 bg-[#2C2C2E] hover:bg-[#3A3A3C] text-white font-bold rounded-2xl text-xs transition">
+            Cerrar
+        </button>
     </div>
 </div>
 
@@ -346,6 +363,18 @@
         }
     }
 
+    /* Funciones para el Modal de Foto Ampliada */
+    function abrirModalFoto(fotoUrl, nombreCliente) {
+        document.getElementById('img-ampliada').src = fotoUrl;
+        document.getElementById('modal-foto-nombre').textContent = nombreCliente;
+        document.getElementById('modal-foto').classList.remove('hidden');
+    }
+
+    function cerrarModalFoto() {
+        document.getElementById('modal-foto').classList.add('hidden');
+    }
+
+    /* Funciones para el Modal de Pago */
     function abrirModalPago(clienteId, clienteNombre) {
         const modal = document.getElementById('modal-pago');
         const form = document.getElementById('form-modal-pago');
