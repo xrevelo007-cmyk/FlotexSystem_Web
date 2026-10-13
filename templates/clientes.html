@@ -148,11 +148,11 @@
             </form>
         </div>
 
-        <!-- Tabla Clientes con Buscador Instantáneo -->
+        <!-- Tabla Clientes con Buscador Instantáneo y Botón de WhatsApp -->
         <div class="lg:col-span-7">
             <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-[#0A84FF] shadow-[0_0_8px_#0A84FF]"></span>
-                2. Base de Clientes (Clic en foto para pagar / renovar)
+                2. Base de Clientes (Clic en foto para pagar / Avisar WhatsApp)
             </h2>
             
             <!-- Barra de Búsqueda de Clientes -->
@@ -168,7 +168,7 @@
                             <th class="p-4">Cliente / Foto</th>
                             <th class="p-4">Estado / Semáforo</th>
                             <th class="p-4">Caducidad</th>
-                            <th class="p-4 text-right">Acción</th>
+                            <th class="p-4 text-right">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-[#2C2C2E]/80">
@@ -210,11 +210,17 @@
                                 <div class="text-[10px] text-[#8E8E93] uppercase">{{ cliente.plan }}</div>
                             </td>
                             <td class="p-4 text-right">
-                                <a href="/clientes/eliminar/{{ cliente.id }}" 
-                                   onclick="return confirm('¿Seguro que deseas eliminar la ficha de este cliente?');"
-                                   class="text-[#FF453A] hover:bg-[#FF453A]/20 border border-[#FF453A]/40 px-3 py-1.5 rounded-xl transition text-[11px] font-semibold">
-                                    Eliminar
-                                </a>
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ cliente.ws_url }}" target="_blank" 
+                                       class="px-2.5 py-1.5 rounded-xl bg-[#30D158]/20 text-[#30D158] border border-[#30D158]/40 hover:bg-[#30D158] hover:text-black transition duration-200 text-[10px] font-bold flex items-center gap-1 shadow-md">
+                                        <span>💬</span> WhatsApp
+                                    </a>
+                                    <a href="/clientes/eliminar/{{ cliente.id }}" 
+                                       onclick="return confirm('¿Seguro que deseas eliminar la ficha de este cliente?');"
+                                       class="text-[#FF453A] hover:bg-[#FF453A]/20 border border-[#FF453A]/40 px-2.5 py-1.5 rounded-xl transition text-[10px] font-semibold">
+                                        Eliminar
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}

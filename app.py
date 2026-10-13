@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 import os
+import urllib.parse
 from datetime import datetime, timedelta
 from database import DB_NAME, inicializar_base_datos
 
@@ -224,6 +225,21 @@ def clientes():
         color, dias, texto_estado = calcular_semaforo(fecha_venc)
         foto_url = url_for('static', filename=f'uploads/{foto}') if foto and foto != "default.png" else 'https://cdn-icons-png.flaticon.com/512/847/847969.png'
         
+        # Formato de WhatsApp para Ecuador (+593)
+        tel_clean = ''.join(filter(str.isdigit, str(telefono)))
+        if tel_clean.startswith('0'):
+            tel_clean = '593' + tel_clean[1:]
+        elif not tel_clean.startswith('593') and len(tel_clean) == 9:
+            tel_clean = '593' + tel_clean
+
+        # Mensaje amigable según el Semáforo para Planeta Fitness
+        if color == 'rojo':
+            msg = f"¡Hola {nombre}! 🥊 Te extrañamos en Planeta Fitness. Tu membresía venció el {fecha_venc}. ¡No dejes enfriar el ritmo! Pasa por recepción para renovar y seguir entrenando duro. 💪🚀"
+        else:
+            msg = f"¡Hola {nombre}! 🏋️‍♂️ Te saluda el equipo de Planeta Fitness. Te recordamos que tu membresía vence el {fecha_venc}. ¡Pasa por recepción para renovar y seguir con todo! 💪🔥"
+
+        ws_url = f"https://api.whatsapp.com/send?phone={tel_clean}&text={urllib.parse.quote(msg)}"
+
         clientes_procesados.append({
             'id': c_id,
             'cedula': cedula,
@@ -237,7 +253,8 @@ def clientes():
             'foto': foto_url,
             'color': color,
             'dias_restantes': dias,
-            'texto_estado': texto_estado
+            'texto_estado': texto_estado,
+            'ws_url': ws_url
         })
 
     return render_template("clientes.html", clientes_list=clientes_procesados, nombre=session.get("nombre"), siguiente_recibo=siguiente_recibo)
