@@ -148,11 +148,11 @@
             </form>
         </div>
 
-        <!-- Tabla Clientes con Buscador Instantáneo y Foto Ampliable -->
+        <!-- Tabla Clientes con Buscador y Foto Ampliable XL -->
         <div class="lg:col-span-7">
             <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-[#0A84FF] shadow-[0_0_8px_#0A84FF]"></span>
-                2. Base de Clientes (Clic en foto para ampliar / Clic en nombre para pagar)
+                2. Base de Clientes (Clic en la foto para ver HD / Nombre para pagar)
             </h2>
             
             <!-- Barra de Búsqueda de Clientes -->
@@ -175,10 +175,15 @@
                         {% for cliente in clientes_list %}
                         <tr class="hover:bg-[#2C2C2E]/40 transition">
                             <td class="p-4">
-                                <div class="flex items-center gap-3 text-left">
-                                    <!-- Foto Ampliable -->
-                                    <img src="{{ cliente.foto }}" alt="Foto" onclick="abrirModalFoto('{{ cliente.foto }}', '{{ cliente.nombre }}')" title="Ampliar foto"
-                                        class="w-12 h-12 rounded-full object-cover border-2 border-[#3A3A3C] hover:border-[#30D158] cursor-pointer transition transform hover:scale-110 shadow-md">
+                                <div class="flex items-center gap-3.5 text-left">
+                                    <!-- Foto del cliente en miniatura mejorada -->
+                                    <div class="relative group cursor-pointer" onclick="abrirModalFoto('{{ cliente.foto }}', '{{ cliente.nombre }}', '{{ cliente.cedula }}')">
+                                        <img src="{{ cliente.foto }}" alt="Foto" 
+                                            class="w-14 h-14 rounded-2xl object-cover border-2 border-[#3A3A3C] group-hover:border-[#30D158] transition duration-300 shadow-md">
+                                        <div class="absolute inset-0 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition duration-200 flex items-center justify-center text-[10px] text-white font-bold">
+                                            🔍
+                                        </div>
+                                    </div>
                                     
                                     <div>
                                         <!-- Nombre con enlace para pagar -->
@@ -236,15 +241,26 @@
     </div>
 </div>
 
-<!-- Modal de Foto Ampliada (Lightbox) -->
-<div id="modal-foto" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4" onclick="cerrarModalFoto()">
-    <div class="bg-[#1C1C1E] border border-[#2C2C2E] rounded-[32px] p-6 w-full max-w-sm shadow-2xl relative text-center" onclick="event.stopPropagation()">
-        <h3 id="modal-foto-nombre" class="text-sm font-bold text-white mb-4 font-mono uppercase tracking-wider"></h3>
+<!-- Modal de Foto Ampliada GIGANTE (Visor XL) -->
+<div id="modal-foto" class="fixed inset-0 bg-black/90 backdrop-blur-lg z-50 hidden flex items-center justify-center p-4" onclick="cerrarModalFoto()">
+    <div class="bg-[#1C1C1E] border border-[#2C2C2E] rounded-[36px] p-6 md:p-8 w-full max-w-lg shadow-[0_0_80px_rgba(0,0,0,0.9)] relative text-center animate-fade-in" onclick="event.stopPropagation()">
+        
+        <!-- Botón X de Cierre -->
+        <button type="button" onclick="cerrarModalFoto()" class="absolute top-4 right-4 w-9 h-9 bg-[#2C2C2E] hover:bg-[#3A3A3C] text-white rounded-full flex items-center justify-center text-sm font-bold transition">
+            ✕
+        </button>
+
+        <h3 id="modal-foto-nombre" class="text-lg font-extrabold text-white mb-1"></h3>
+        <p id="modal-foto-cedula" class="text-xs text-[#30D158] font-mono mb-6"></p>
+
+        <!-- Imagen Ampliada Cómoda y Gigante -->
         <div class="flex justify-center mb-6">
-            <img id="img-ampliada" src="" alt="Foto Ampliada" class="w-56 h-56 rounded-2xl object-cover border-2 border-[#30D158] shadow-[0_0_30px_rgba(48,209,88,0.3)]">
+            <img id="img-ampliada" src="" alt="Foto Cliente" 
+                class="w-80 h-80 md:w-96 md:h-96 rounded-3xl object-cover border-4 border-[#30D158]/80 shadow-[0_0_40px_rgba(48,209,88,0.35)] transition">
         </div>
-        <button type="button" onclick="cerrarModalFoto()" class="w-full h-10 bg-[#2C2C2E] hover:bg-[#3A3A3C] text-white font-bold rounded-2xl text-xs transition">
-            Cerrar
+
+        <button type="button" onclick="cerrarModalFoto()" class="w-full h-12 bg-gradient-to-r from-[#30D158] to-[#248A3D] hover:from-[#248A3D] text-black font-extrabold rounded-2xl text-xs transition shadow-lg">
+            Cerrar Vista Previa
         </button>
     </div>
 </div>
@@ -363,10 +379,11 @@
         }
     }
 
-    /* Funciones para el Modal de Foto Ampliada */
-    function abrirModalFoto(fotoUrl, nombreCliente) {
+    /* Modal de Foto Ampliada XL */
+    function abrirModalFoto(fotoUrl, nombreCliente, cedulaCliente) {
         document.getElementById('img-ampliada').src = fotoUrl;
         document.getElementById('modal-foto-nombre').textContent = nombreCliente;
+        document.getElementById('modal-foto-cedula').textContent = `C.I: ${cedulaCliente}`;
         document.getElementById('modal-foto').classList.remove('hidden');
     }
 
@@ -374,7 +391,7 @@
         document.getElementById('modal-foto').classList.add('hidden');
     }
 
-    /* Funciones para el Modal de Pago */
+    /* Modal de Pago */
     function abrirModalPago(clienteId, clienteNombre) {
         const modal = document.getElementById('modal-pago');
         const form = document.getElementById('form-modal-pago');
