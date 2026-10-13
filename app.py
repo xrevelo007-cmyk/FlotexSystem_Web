@@ -41,28 +41,27 @@ def login():
                     flash("¡Bienvenido Creador Xavier Revelo! Instancia configurada con éxito.", "success")
                 else:
                     flash(f"Sesión iniciada correctamente. ¡Hola, {nombre}!", "success")
-
+                
                 conn.close()
                 return redirect(url_for("dashboard"))
             else:
                 conn.close()
-                flash("Usuario o contraseña incorrectos.", "error")
-
+                flash("Credenciales incorrectas. Verifica tu usuario y contraseña.", "error")
         except Exception as e:
-            flash(f"Error en el servidor: {e}", "error")
+            flash(f"Error en el sistema: {e}", "error")
 
     return render_template("login.html")
 
-# --- RUTA DASHBOARD ---
+# --- DASHBOARD ---
 @app.route("/dashboard")
 def dashboard():
     if "usuario" not in session:
         return redirect(url_for("login"))
     return render_template("dashboard.html", nombre=session.get("nombre"), cargo=session.get("cargo"))
 
-# --- MÓDULO DE STAFF ---
-@app.route("/staff", methods=["GET", "POST"])
-def staff():
+# --- MÓDULO DE CLIENTES ---
+@app.route("/clientes", methods=["GET", "POST"])
+def clientes():
     if "usuario" not in session:
         return redirect(url_for("login"))
 
@@ -72,62 +71,55 @@ def staff():
     if request.method == "POST":
         cedula = request.form.get("cedula", "").strip()
         nombre = request.form.get("nombre", "").strip()
-        cargo = request.form.get("cargo", "").strip()
         telefono = request.form.get("telefono", "").strip()
-        usuario = request.form.get("usuario", "").strip()
-        password = request.form.get("password", "").strip()
+        plan = request.form.get("plan", "").strip()
+        fecha_vencimiento = request.form.get("fecha_vencimiento", "").strip()
 
         # Validación estricta de 10 dígitos numéricos
         if not cedula.isdigit() or len(cedula) != 10:
-            flash("La cédula debe contener exactamente 10 dígitos numéricos.", "error")
+            flash("La cédula del cliente debe contener exactamente 10 dígitos numéricos.", "error")
         elif telefono and (not telefono.isdigit() or len(telefono) != 10):
             flash("El teléfono debe contener exactamente 10 dígitos numéricos.", "error")
         else:
             try:
                 cursor.execute("""
-                    INSERT INTO staff (cedula, nombre, cargo, telefono, usuario, password)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, (cedula, nombre, cargo, telefono, usuario, password))
+                    INSERT INTO clientes (cedula, nombre, telefono, plan, fecha_vencimiento, estado)
+                    VALUES (?, ?, ?, ?, ?, 'Activo')
+                """, (cedula, nombre, telefono, plan, fecha_vencimiento))
                 conn.commit()
-                flash("Usuario creado exitosamente.", "success")
+                flash("Cliente registrado exitosamente.", "success")
             except sqlite3.IntegrityError:
-                flash("Error: La cédula o el usuario ya existen.", "error")
+                flash("Error: La cédula de este cliente ya se encuentra registrada.", "error")
             except Exception as e:
-                flash(f"Error al guardar: {e}", "error")
+                flash(f"Error al guardar cliente: {e}", "error")
 
-    cursor.execute("SELECT id, cedula, nombre, cargo, telefono, usuario, estado FROM staff")
-    lista_staff = cursor.fetchall()
+    cursor.execute("SELECT id, cedula, nombre, telefono, plan, fecha_vencimiento, estado FROM clientes")
+    lista_clientes = cursor.fetchall()
     conn.close()
 
-    return render_template("staff.html", staff_members=lista_staff, nombre=session.get("nombre"))
+    return render_template("clientes.html", clientes_list=lista_clientes, nombre=session.get("nombre"))
 
-# --- ELIMINAR STAFF ---
-@app.route("/staff/eliminar/<int:staff_id>")
-def eliminar_staff(staff_id):
+# --- ELIMINAR CLIENTE ---
+@app.route("/clientes/eliminar/<int:cliente_id>")
+def eliminar_cliente(cliente_id):
     if "usuario" not in session:
         return redirect(url_for("login"))
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    
-    # Evitar eliminar al creador
-    cursor.execute("SELECT cedula FROM staff WHERE id = ?", (staff_id,))
-    target = cursor.fetchone()
-    if target and target[0] == "1722207287":
-        flash("No es posible eliminar la cuenta principal del creador.", "error")
-    else:
-        cursor.execute("DELETE FROM staff WHERE id = ?", (staff_id,))
-        conn.commit()
-        flash("Usuario eliminado correctamente.", "success")
-        
+    cursor.execute("DELETE FROM clientes WHERE id = ?", (cliente_id,))
+    conn.commit()
     conn.close()
-    return redirect(url_for("staff"))
+    
+    flash("Cliente eliminado correctamente.", "success")
+    return redirect(url_for("clientes"))
 
 # --- CERRAR SESIÓN ---
 @app.route("/logout")
 def logout():
     session.clear()
+    flash("Sesión cerrada correctamente.", "success")
     return redirect(url_for("login"))
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True)
