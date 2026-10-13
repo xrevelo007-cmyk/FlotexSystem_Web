@@ -1,34 +1,38 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlotexSystem — Web</title>
+    <title>FlotexSystem - Gestión de Gimnasio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        iosBg: '#000000',
-                        iosCard: '#1C1C1E',
-                        iosBorder: '#2C2C2E',
-                        iosBlue: '#0A84FF',
-                        iosBlueHover: '#0066CC',
-                        iosTextGray: '#8E8E93'
-                    }
-                }
-            }
-        }
-    </script>
 </head>
-<body class="bg-iosBg text-white font-sans antialiased min-h-screen flex flex-col justify-between">
-    <main class="flex-grow flex items-center justify-center p-4">
+<body class="bg-[#09090B] text-white min-h-screen font-sans flex flex-col justify-between items-center p-4 md:p-8">
+
+    <!-- Navegación Superior -->
+    {% if session.get('usuario') %}
+    <nav class="w-full max-w-7xl bg-[#121214]/80 border border-[#2C2C2E] rounded-2xl px-6 py-4 mb-6 backdrop-blur-md flex justify-between items-center shadow-lg">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">🏋️‍♂️</span>
+            <span class="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-[#30D158] to-[#0A84FF]">FLOTEX SYSTEM</span>
+        </div>
+        <div class="flex items-center gap-4 text-xs font-bold">
+            <a href="/dashboard" class="text-[#8E8E93] hover:text-white transition">Dashboard</a>
+            <a href="/clientes" class="text-[#8E8E93] hover:text-[#30D158] transition">Clientes</a>
+            <a href="/staff" class="text-[#8E8E93] hover:text-[#0A84FF] transition">Staff</a>
+            <a href="/logout" class="text-[#FF453A] hover:underline transition">Salir</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Contenido dinámico -->
+    <main class="w-full max-w-7xl flex justify-center">
         {% block content %}{% endblock %}
     </main>
-    <footer class="text-center py-4 text-xs text-[#636366]">
-        © 2026 FlotexSystem — Xavier Revelo<br>All rights reserved
+
+    <!-- Footer -->
+    <footer class="mt-8 text-center text-[11px] text-[#636366]">
+        &copy; 2026 FlotexSystem. Todos los derechos reservados.
     </footer>
+
 </body>
 </html>
